@@ -27,10 +27,9 @@ node('maven-appdev') {
 
   // Checkout Source Code
   stage('Checkout Source') {
-    // TBD
 	git credentialsId: 'gogs-tjones', url: 'http://gogs-tjones-gogs.apps.rdu.example.opentlc.com/CICDLabs/openshift-tasks-private.git'
-	sh "git rev-parse --short HEAD > .git/commit-id"                        
-	commit_id = readFile('.git/commit-id')
+	//sh "git rev-parse --short HEAD > .git/commit-id"                        
+	//commit_id = readFile('.git/commit-id')
   }
 
 
