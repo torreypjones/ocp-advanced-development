@@ -20,10 +20,6 @@ node('maven-appdev') {
     // Checkout Source Code
     stage('Checkout Source') {
             git credentialsId: 'gogs-tjones', url: 'http://gogs-tjones-gogs.apps.rdu.example.opentlc.com/CICDLabs/openshift-tasks-private.git'
-            sh "git rev-parse --short HEAD > .git/commit-id"
-            commit_id = readFile('.git/commit-id')
-            devTag  = "${version}-${commit_id}-JenkinsBuildNum${env.BUILD_NUMBER}"
-            prodTag = "${version}"
         }
 
     // The following variables need to be defined at the top level
@@ -33,6 +29,16 @@ node('maven-appdev') {
     def groupId    = getGroupIdFromPom("pom.xml")
     def artifactId = getArtifactIdFromPom("pom.xml")
     def version    = getVersionFromPom("pom.xml")
+
+    // setup some runtime variables
+    stage('Init Variables') {
+        echo "setting up devTag, prodTag, commit_id"
+        sh "git rev-parse --short HEAD > .git/commit-id"
+        commit_id = readFile('.git/commit-id')
+        devTag  = "${version}-${commit_id}-JenkinsBuildNum${env.BUILD_NUMBER}"
+        prodTag = "${version}"
+
+    }
 
     // Using Maven build the war file
     // Do not run tests in this step
