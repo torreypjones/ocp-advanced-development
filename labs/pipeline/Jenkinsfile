@@ -12,7 +12,8 @@ node('maven-appdev') {
 
     // Checkout Source Code
     stage('Checkout Source') {
-        // TBD
+        git credentialsId: 'gogs-tjones', url: 'http://gogs-tjones-gogs.apps.rdu.example.opentlc.com/CICDLabs/openshift-tasks-private.git'
+
     }
 
     // The following variables need to be defined at the top level
