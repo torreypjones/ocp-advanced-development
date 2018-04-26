@@ -48,7 +48,7 @@ node('maven-appdev') {
     stage('Build war') {
         echo "Building version ${version}"
         echo "executing env.mvnCmd to \"${mvnCmd}\""
-        sh ${mvnCmd}
+        sh mvnCmd
 
     }
 
