@@ -37,6 +37,9 @@ node('maven-appdev') {
         commit_id = readFile('.git/commit-id')
         devTag  = "${version}-${commit_id}-JenkinsBuildNum${env.BUILD_NUMBER}"
         prodTag = "${version}"
+        echo "devTag=${devTag}"
+        echo "prodTag=${prodTag}"
+        echo "commid_id=${commit_id}"
 
     }
 
