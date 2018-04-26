@@ -8,7 +8,7 @@ node('maven-appdev') {
     // settings for our Nexus installation (use the service to
     // bypass the router). The file nexus_openshift_settings.xml
     // needs to be in the Source Code repository.
-    def mvnCmd = "mvn -s ./nexus_openshift_settings.xml"
+    def mvnCmd = "mvn -s ./nexus_openshift_settings.xml -DskipTests clean package"
 
 
     // Set the tag for the development image: version + build number
@@ -47,9 +47,8 @@ node('maven-appdev') {
     // Do not run tests in this step
     stage('Build war') {
         echo "Building version ${version}"
-        env.mvnCmd = "mvn -s ./nexus_openshift_settings.xml"
-        echo "executing env.mvnCmd to \"${env.mvnCmd}\""
-        sh "${env.mvnCmd}"
+        echo "executing env.mvnCmd to \"${mvnCmd}\""
+        sh ${mvnCmd}
 
     }
 
