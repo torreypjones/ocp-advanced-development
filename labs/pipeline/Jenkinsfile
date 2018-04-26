@@ -34,7 +34,7 @@ node('maven-appdev') {
     stage('Init Variables') {
         echo "setting up devTag, prodTag, commit_id"
         sh "git rev-parse --short HEAD > .git/commit-id"
-        commit_id = readFile('.git/commit-id')
+        commit_id = readFile('.git/commit-id').trim()
         devTag  = "${version}-${commit_id}-JenkinsBuildNum${env.BUILD_NUMBER}"
         prodTag = "${version}"
         echo "devTag=${devTag}"
