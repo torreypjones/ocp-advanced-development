@@ -48,7 +48,9 @@ node('maven-appdev') {
     stage('Build war') {
         echo "Building version ${version}"
         env.mvnCmd = "mvn -s ./nexus_openshift_settings.xml"
-        echo "set env.mvnCmd to \"${env.mvnCmd}\""
+        echo "executing env.mvnCmd to \"${env.mvnCmd}\""
+        sh "${env.mvnCmd}"
+
     }
 
     // Using Maven run the unit tests
