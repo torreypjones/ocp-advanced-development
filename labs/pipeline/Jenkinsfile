@@ -28,10 +28,10 @@ node('maven-appdev') {
   stage('Checkout Source') {
     // TBD
 	git credentialsId: 'gogs-tjones', url: 'http://gogs-tjones-gogs.apps.rdu.example.opentlc.com/CICDLabs/openshift-tasks-private.git'
-	//sh "git rev-parse --short HEAD > .git/commit-id"                        
-	//commit_id = readFile('.git/commit-id')
-	//devTag  = "${version}-${commit_id}-JenkinsBuildNum${env.BUILD_NUMBER}"
-	//prodTag = "${version}"
+	// sh "git rev-parse --short HEAD > .git/commit-id"
+	// commit_id = readFile('.git/commit-id')
+	// devTag  = "${version}-${commit_id}-JenkinsBuildNum${env.BUILD_NUMBER}"
+	// prodTag = "${version}"
 
   }
 
