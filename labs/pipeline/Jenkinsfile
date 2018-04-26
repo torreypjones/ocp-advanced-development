@@ -10,11 +10,21 @@ node('maven-appdev') {
     // needs to be in the Source Code repository.
     def mvnCmd = "mvn -s ./nexus_openshift_settings.xml"
 
+
+    // Set the tag for the development image: version + build number
+    def devTag  = "0.0-0"
+    // Set the tag for the production image: version
+    def prodTag = "0.0"
+    def commit_id = "unknown"
+
     // Checkout Source Code
     stage('Checkout Source') {
-        git credentialsId: 'gogs-tjones', url: 'http://gogs-tjones-gogs.apps.rdu.example.opentlc.com/CICDLabs/openshift-tasks-private.git'
-
-    }
+            git credentialsId: 'gogs-tjones', url: 'http://gogs-tjones-gogs.apps.rdu.example.opentlc.com/CICDLabs/openshift-tasks-private.git'
+            sh "git rev-parse --short HEAD > .git/commit-id"
+            commit_id = readFile('.git/commit-id')
+            devTag  = "${version}-${commit_id}-JenkinsBuildNum${env.BUILD_NUMBER}"
+            prodTag = "${version}"
+        }
 
     // The following variables need to be defined at the top level
     // and not inside the scope of a stage - otherwise they would not
@@ -23,11 +33,6 @@ node('maven-appdev') {
     def groupId    = getGroupIdFromPom("pom.xml")
     def artifactId = getArtifactIdFromPom("pom.xml")
     def version    = getVersionFromPom("pom.xml")
-
-    // Set the tag for the development image: version + build number
-    def devTag  = "0.0-0"
-    // Set the tag for the production image: version
-    def prodTag = "0.0"
 
     // Using Maven build the war file
     // Do not run tests in this step
