@@ -75,7 +75,8 @@ node('maven-appdev') {
         // TBD
         // sh "mvn -s ./nexus_openshift_settings.xml deploy:deploy-file -DgroupId=tjones -DartifactId=${artifactId} -Dversion=${devTag} -DgeneratePom=true -Dpackaging=war -DrepositoryId=${repositoryId} -Durl=http://localhost:8081/nexus/content/repositories/releases -Dfile=target/project-1.0.0.jar"
         // sh "mvn -s ./nexus_openshift_settings.xml deploy:deploy-file -DgroupId=tjones -DartifactId=${artifactId} -Dversion=${devTag} -DgeneratePom=true -Dpackaging=war -DrepositoryId=${repositoryId} -Durl=http://nexus3-tjones-nexus.apps.rdu.example.opentlc.com/repository/releases/ -Dfile /tmp/workspace/tasks/target/openshift-tasks.war"
-        sh "mvn -s ./nexus_settings.xml deploy -DskipTests=true -DaltDeploymentRepository=nexus::default::http://$(oc get route nexus3 -n tjones-nexus --template='{{ .spec.host }}')/repository/releases"
+        def myroute = sh "oc get route nexus3 -n tjones-nexus --template='{{ .spec.host }}'"
+        sh "mvn -s ./nexus_settings.xml deploy -DskipTests=true -DaltDeploymentRepository=nexus::default::http://${myroute}/repository/releases"
 
     }
 
