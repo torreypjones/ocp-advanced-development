@@ -140,10 +140,9 @@ node('maven-appdev') {
         // Blue/Green Deployment into Production
 // -------------------------------------
 // Do not activate the new version yet.
-        def destApp   = "tasks-green"
+        def destApp = "tasks-green"
         def activeApp = ""
 
-    stage('Blue/Green Production Deployment') {
         sh "oc get route tasks -n tjones-tasks-prod -o jsonpath='{ .spec.to.name }' > activesvc.txt"
         activeApp = readFile('activesvc.txt').trim()
         if (activeApp == "tasks-green") {
@@ -169,7 +168,6 @@ node('maven-appdev') {
         echo "Switching Production application to ${destApp}."
 
     }
-}
 
 // Convenience Functions to read variables from the pom.xml
 // Do not change anything below this line.
