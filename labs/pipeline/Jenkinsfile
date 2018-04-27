@@ -83,6 +83,9 @@ node('maven-appdev') {
     stage('Build and Tag OpenShift Image') {
         echo "Building OpenShift container image tasks:${devTag}"
         sh "oc start-build tasks --follow --from-file=./target/openshift-tasks.war -n tjones-tasks-dev"
+        // alternatively use the artifact just pushed to the nexus repo:
+        // Torreys-MacBook-Pro:IdeaProjects tjones$ oc start-build tasks --from-file="http://nexus3-tjones-nexus.apps.rdu.example.opentlc.com/repository/releases/org/jboss/quickstarts/eap/tasks/1.0-0/tasks-1.0-0.war" --follow
+        // Uploading file from "http://nexus3-tjones-nexus.apps.rdu.example.opentlc.com/repository/releases/org/jboss/quickstarts/eap/tasks/1.0-0/tasks-1.0-0.war" as binary input for the build ...
         openshiftTag alias: 'false', apiURL: '', authToken: '', destStream: 'tasks', destTag: devTag, destinationAuthToken: '', destinationNamespace: 'tjones-tasks-dev', namespace: 'tjones-tasks-dev', srcStream: 'tasks', srcTag: 'latest', verbose: 'true'
 
 
@@ -91,9 +94,13 @@ node('maven-appdev') {
     // Deploy the built image to the Development Environment.
     stage('Deploy to Dev') {
         echo "Deploying container image to Development Project"
-        openshiftBuild apiURL: '', authToken: '', bldCfg: 'tasks', buildName: '', checkForTriggeredDeployments: 'true', commitID: '', namespace: 'tjones-tasks-dev', showBuildLogs: 'true', verbose: 'true', waitTime: '', waitUnit: 'sec'
+        sh "oc set image dc/tasks tasks=docker-registry.default.svc:5000/tjones-tasks-dev/tasks:${devTag} -n tjones-tasks-dev"
+        sh "oc delete configmap tasks-config -n tjones-tasks-dev --ignore-not-found=true"
+        sh "oc create configmap tasks-config --from-file=./configuration/application-users.properties --from-file=./configuration/application-roles.properties -n tjones-tasks-dev"
 
-        // TBD
+        openshiftDeploy depCfg: 'tasks', namespace: 'tjones-tasks-dev', verbose: 'false', waitTime: '', waitUnit: 'sec'
+        openshiftVerifyDeployment depCfg: 'tasks', namespace: 'tjones-tasks-dev', replicaCount: '1', verbose: 'false', verifyReplicaCount: 'false', waitTime: '', waitUnit: 'sec'
+        openshiftVerifyService namespace: 'tjones-tasks-dev', svcName: 'tasks', verbose: 'false'
     }
 
     // Run Integration Tests in the Development Environment.
