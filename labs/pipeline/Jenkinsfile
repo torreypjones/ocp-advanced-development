@@ -88,6 +88,8 @@ node('maven-appdev') {
     // Deploy the built image to the Development Environment.
     stage('Deploy to Dev') {
         echo "Deploying container image to Development Project"
+        openshiftBuild apiURL: '', authToken: '', bldCfg: 'tasks', buildName: '', checkForTriggeredDeployments: 'true', commitID: '', namespace: 'tjones-tasks-dev', showBuildLogs: 'true', verbose: 'true', waitTime: '', waitUnit: 'sec'
+
         // TBD
     }
 
