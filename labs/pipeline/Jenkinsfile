@@ -67,8 +67,7 @@ node('maven-appdev') {
     stage('Code Analysis') {
         echo "Running Code Analysis"
         echo "skipping code analysis for speediness during pipeline development..."
-        echo "TODO: define code analysis stage"
-        // TBD
+        sh "${mvnCmd} sonar:sonar -Dsonar.host.url=http://sonarqube-tjones-sonar.apps.rdu.example.opentlc.com/ -Dsonar.projectName=${JOB_BASE_NAME}-${devTag}"
     }
 
     // Publish the built war file to Nexus
@@ -78,14 +77,12 @@ node('maven-appdev') {
         // sh "mvn -s ./nexus_openshift_settings.xml deploy:deploy-file -DgroupId=tjones -DartifactId=${artifactId} -Dversion=${devTag} -DgeneratePom=true -Dpackaging=war -DrepositoryId=${repositoryId} -Durl=http://localhost:8081/nexus/content/repositories/releases -Dfile=target/project-1.0.0.jar"
         // sh "mvn -s ./nexus_openshift_settings.xml deploy:deploy-file -DgroupId=tjones -DartifactId=${artifactId} -Dversion=${devTag} -DgeneratePom=true -Dpackaging=war -DrepositoryId=${repositoryId} -Durl=http://nexus3-tjones-nexus.apps.rdu.example.opentlc.com/repository/releases/ -Dfile /tmp/workspace/tasks/target/openshift-tasks.war"
         sh "${mvnCmd} deploy -DaltDeploymentRepository=nexus::default::http://nexus3-tjones-nexus.apps.rdu.example.opentlc.com/repository/releases"
-
     }
 
     // Build the OpenShift Image in OpenShift and tag it.
     stage('Build and Tag OpenShift Image') {
         echo "Building OpenShift container image tasks:${devTag}"
         sh "oc start-build tasks --follow --from-file=./target/openshift-tasks.war -n tjones-tasks-dev"
-
         openshiftTag alias: 'false', apiURL: '', authToken: '', destStream: 'tasks', destTag: devTag, destinationAuthToken: '', destinationNamespace: 'tjones-tasks-dev', namespace: 'tjones-tasks-dev', srcStream: 'tasks', srcTag: 'latest', verbose: 'true'
 
 
