@@ -8,7 +8,9 @@ node('maven-appdev') {
     // settings for our Nexus installation (use the service to
     // bypass the router). The file nexus_openshift_settings.xml
     // needs to be in the Source Code repository.
-    def mvnCmd = "mvn -s ./nexus_openshift_settings.xml -DskipTests clean package"
+    // def mvnCmd = "mvn -s ./nexus_openshift_settings.xml -DskipTests clean package"
+    // def mvnCmd = "mvn -s ./nexus_openshift_settings.xml -DskipTests clean package"
+    def mvnCmd = "mvn -s ./nexus_openshift_settings.xml -DskipTests "
     def mvnUnitTest = "mvn test"
 
 
@@ -49,8 +51,8 @@ node('maven-appdev') {
     // Do not run tests in this step
     stage('Build war') {
         echo "Building version ${version}"
-        echo "executing env.mvnCmd to \"${mvnCmd}\""
-        sh mvnCmd
+        echo "executing env.mvnCmd to \"${mvnCmd} clean packaage\""
+        sh "${mvnCmd} clean package"
 
     }
 
@@ -58,7 +60,7 @@ node('maven-appdev') {
     stage('Unit Tests') {
         echo "Running Unit Tests with ${mvnUnitTest}"
         echo "skipping unit tests for speediness during pipeline development..."
-        // sh mvnUnitTest
+        // sh "${mvnCmd} test"
     }
 
     // Using Maven call SonarQube for Code Analysis
@@ -75,14 +77,18 @@ node('maven-appdev') {
         // TBD
         // sh "mvn -s ./nexus_openshift_settings.xml deploy:deploy-file -DgroupId=tjones -DartifactId=${artifactId} -Dversion=${devTag} -DgeneratePom=true -Dpackaging=war -DrepositoryId=${repositoryId} -Durl=http://localhost:8081/nexus/content/repositories/releases -Dfile=target/project-1.0.0.jar"
         // sh "mvn -s ./nexus_openshift_settings.xml deploy:deploy-file -DgroupId=tjones -DartifactId=${artifactId} -Dversion=${devTag} -DgeneratePom=true -Dpackaging=war -DrepositoryId=${repositoryId} -Durl=http://nexus3-tjones-nexus.apps.rdu.example.opentlc.com/repository/releases/ -Dfile /tmp/workspace/tasks/target/openshift-tasks.war"
-        sh "mvn -s ./nexus_settings.xml deploy -DskipTests=true -DaltDeploymentRepository=nexus::default::http://nexus3-tjones-nexus.apps.rdu.example.opentlc.com/repository/releases"
+        sh "${mvnCmd} deploy -DaltDeploymentRepository=nexus::default::http://nexus3-tjones-nexus.apps.rdu.example.opentlc.com/repository/releases"
 
     }
 
     // Build the OpenShift Image in OpenShift and tag it.
     stage('Build and Tag OpenShift Image') {
         echo "Building OpenShift container image tasks:${devTag}"
-        // TBD
+        sh "oc start-build tasks --follow --from-file=./target/openshift-tasks.war -n tjones-tasks-dev"
+
+        openshiftTag alias: 'false', apiURL: '', authToken: '', destStream: 'tasks', destTag: devTag, destinationAuthToken: '', destinationNamespace: 'tjones-tasks-dev', namespace: 'tjones-tasks-dev', srcStream: 'tasks', srcTag: 'latest', verbose: 'true'
+
+
     }
 
     // Deploy the built image to the Development Environment.
