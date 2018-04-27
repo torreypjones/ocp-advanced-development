@@ -13,25 +13,24 @@ node('maven-appdev') {
     def mvnCmd = "mvn -s ./nexus_openshift_settings.xml -DskipTests "
     def mvnUnitTest = "mvn test"
 
-
     // Set the tag for the development image: version + build number
-    def devTag  = "0.0-0"
+    def devTag = "0.0-0"
     // Set the tag for the production image: version
     def prodTag = "0.0"
     def commit_id = "unknown"
 
     // Checkout Source Code
     stage('Checkout Source') {
-            git credentialsId: 'gogs-tjones', url: 'http://gogs-tjones-gogs.apps.rdu.example.opentlc.com/CICDLabs/openshift-tasks-private.git'
-        }
+        git credentialsId: 'gogs-tjones', url: 'http://gogs-tjones-gogs.apps.rdu.example.opentlc.com/CICDLabs/openshift-tasks-private.git'
+    }
 
     // The following variables need to be defined at the top level
     // and not inside the scope of a stage - otherwise they would not
     // be accessible from other stages.
     // Extract version and other properties from the pom.xml
-    def groupId    = getGroupIdFromPom("pom.xml")
+    def groupId = getGroupIdFromPom("pom.xml")
     def artifactId = getArtifactIdFromPom("pom.xml")
-    def version    = getVersionFromPom("pom.xml")
+    def version = getVersionFromPom("pom.xml")
     def repositoryId = "Nexus"
 
     // setup some runtime variables
@@ -39,7 +38,7 @@ node('maven-appdev') {
         echo "setting up devTag, prodTag, commit_id"
         sh "git rev-parse --short HEAD > .git/commit-id"
         commit_id = readFile('.git/commit-id').trim()
-        devTag  = "${version}-${commit_id}-JenkinsBuildNum${env.BUILD_NUMBER}"
+        devTag = "${version}-${commit_id}-JenkinsBuildNum${env.BUILD_NUMBER}"
         prodTag = "${version}"
         echo "devTag=${devTag}"
         echo "prodTag=${prodTag}"
@@ -130,16 +129,10 @@ node('maven-appdev') {
         openshiftTag alias: 'false', destStream: 'tasks', destTag: prodTag, destinationNamespace: 'tjones-tasks-dev', namespace: 'tjones-tasks-dev', srcStream: 'tasks', srcTag: devTag, verbose: 'false'
     }
 
-    // Blue/Green Deployment into Production
-    // -------------------------------------
-    // Do not activate the new version yet.
-    def destApp   = "tasks-green"
-    def activeApp = ""
-
     stage('Blue/Green Production Deployment') {
         // Blue/Green Deployment into Production
-// -------------------------------------
-// Do not activate the new version yet.
+        // -------------------------------------
+        // Do not activate the new version yet.
         def destApp = "tasks-green"
         def activeApp = ""
 
@@ -172,15 +165,16 @@ node('maven-appdev') {
 // Convenience Functions to read variables from the pom.xml
 // Do not change anything below this line.
 // --------------------------------------------------------
-def getVersionFromPom(pom) {
-    def matcher = readFile(pom) =~ '<version>(.+)</version>'
-    matcher ? matcher[0][1] : null
-}
-def getGroupIdFromPom(pom) {
-    def matcher = readFile(pom) =~ '<groupId>(.+)</groupId>'
-    matcher ? matcher[0][1] : null
-}
-def getArtifactIdFromPom(pom) {
-    def matcher = readFile(pom) =~ '<artifactId>(.+)</artifactId>'
-    matcher ? matcher[0][1] : null
+    def getVersionFromPom(pom) {
+        def matcher = readFile(pom) =~ '<version>(.+)</version>'
+        matcher ? matcher[0][1] : null
+    }
+    def getGroupIdFromPom(pom) {
+        def matcher = readFile(pom) =~ '<groupId>(.+)</groupId>'
+        matcher ? matcher[0][1] : null
+    }
+    def getArtifactIdFromPom(pom) {
+        def matcher = readFile(pom) =~ '<artifactId>(.+)</artifactId>'
+        matcher ? matcher[0][1] : null
+    }
 }
